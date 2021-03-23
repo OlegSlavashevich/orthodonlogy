@@ -6,7 +6,7 @@ import './style.scss';
 import { Vector3 } from 'three';
 
 interface IProps {
-
+    setClickedPoint?: (point: Vector3) => void;
 }
 
 const Model: FunctionComponent<IProps> = (props: IProps) => {
@@ -17,7 +17,7 @@ const Model: FunctionComponent<IProps> = (props: IProps) => {
     geom.name = 'MyCube_s';
     const ref = useRef<any>(null);
 
-    const [pointCoords, setPointCoords] = useState<Vector3 | undefined>(undefined); 
+    const [pointCoords, setPointCoords] = useState<Vector3>(); 
 
     useEffect(() => {
         if (ref.current) camera.lookAt(ref.current.position);
@@ -25,22 +25,23 @@ const Model: FunctionComponent<IProps> = (props: IProps) => {
 
     function handleGeometryClick(event: any): void {
         setPointCoords(event.point);
+        if (props.setClickedPoint) props.setClickedPoint(event.point);
     }
 
     return (
         <>
             <mesh ref={ref} onClick={handleGeometryClick}>
                 <primitive object={geom} attach="geometry" />
-                <meshStandardMaterial color={"#A9A9A9"} />
+                <meshStandardMaterial color={"#FFD700"} />
             </mesh>
-            <mesh position={pointCoords} ref={ref} onClick={handleGeometryClick}>
+            <mesh position={pointCoords} ref={ref}>
                 <sphereGeometry attach="geometry" args={[0.4, 16, 16]} />
                 <meshStandardMaterial color={"red"} />
             </mesh>
             <ambientLight />
-            <pointLight position={[10, 10, 10]} />
+            <pointLight position={[20, 20, -20]} />
         </>
     );
-}
+};
 
 export default Model;
