@@ -1,0 +1,9 @@
+.value-form {
+    display: flex;
+    flex-direction: column;
+    &__value {
+        display: flex;
+        width: 80%;
+        margin: 15px auto 0 auto;
+    }
+}

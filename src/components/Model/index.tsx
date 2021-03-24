@@ -4,8 +4,10 @@ import { STLLoader } from "three/examples/jsm/loaders/STLLoader";
 import { useLoader, useThree } from "react-three-fiber";
 import './style.scss';
 import { Vector3 } from 'three';
+import { ICoord } from '../CoordsTable';
 
 interface IProps {
+    coords?: ICoord[];
     setClickedPoint?: (point: Vector3) => void;
 }
 
@@ -18,6 +20,12 @@ const Model: FunctionComponent<IProps> = (props: IProps) => {
     const ref = useRef<any>(null);
 
     const [pointCoords, setPointCoords] = useState<Vector3>(); 
+
+    useEffect(() => {
+        if (props?.coords?.length) {
+            setPointCoords(new THREE.Vector3( 1, 0, 0 ));
+        }
+    }, [props.coords]);
 
     useEffect(() => {
         if (ref.current) camera.lookAt(ref.current.position);
