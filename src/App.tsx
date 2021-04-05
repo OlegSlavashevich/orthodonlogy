@@ -9,6 +9,8 @@ import "antd/dist/antd.css";
 import CoordsView from "./components/CoordsVIew";
 import  CoordsTable, { ICoord } from "./components/CoordsTable";
 import ValueForm, { Values } from "./components/ValueForm";
+import axios from "axios";
+import { saveAs } from 'file-saver';
 
 function App() {
     const [clickedPoint, setClickedPoint] = useState<Vector3>();
@@ -18,6 +20,16 @@ function App() {
     useEffect(() => {
         console.log(coords);
     }, [coords]);
+
+    function generateFile() {
+        axios.post('http://localhost:8000/api/generate', coords)
+            .then(() => axios.get('http://localhost:8000/api/fetch', { responseType: 'blob' }))
+            .then((res) => {
+                    const textBlob = new Blob([res.data], { type: 'application/text' });
+                    saveAs(textBlob, 'result.txt');
+            }
+        );
+    }
 
     function handleValuesChange(values: Values): void {
         const newCoordsList = [...coords];
@@ -71,7 +83,7 @@ function App() {
                                 backgroundColor: '#F5F5F5',
                                 boxShadow: 'inset -1px 0px 0px #E6E6E6'}}>
                                     <div style={{ display: 'flex' }}><Typography.Title style={{ marginLeft: '40px' }} level={4}>Coords And Values table</Typography.Title>
-                            <Button style={{ margin: 'auto 40px auto auto' }} type="primary">Export to File</Button></div>
+                            <Button style={{ margin: 'auto 40px auto auto' }} type="primary" onClick={generateFile}>Export to File</Button></div>
                             <CoordsTable coords={coords}/>
                         </Layout.Footer>
                     </Layout>
