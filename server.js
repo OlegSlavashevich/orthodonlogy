@@ -1,6 +1,7 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import fs from 'fs';
+import fileUpload from 'express-fileupload';
 
 const PORT = 8000;
 const app = express();
@@ -13,7 +14,26 @@ app.use(function(req, res, next) {
 
 app.use(bodyParser.json());
 
-app.post('/api/generate', (req, res) => {
+app.use(express.static(process.cwd()+"/geometry/"));
+
+app.use(fileUpload({
+    limits: { fileSize: 50 * 1024 * 1024 },
+}));
+
+app.post('/api/uploadGeometry', (req, res) => {
+    const geometry = req.files.geometry;
+    const geometryName = geometry.name;
+    geometry.mv('./geometry/' + geometryName, (err) => {
+        if (err) res.send(false);
+        res.send(geometryName);
+    });
+});
+
+app.get('/api/getGeometry/*', (req, res) => {
+    res.sendFile(`${process.cwd()}/geometry/${req.url.split('/')[req.url.split('/').length - 1]}`);
+});
+
+app.post('/api/generateFile', (req, res) => {
     const coords = req.body.map((coord) => (
         `X:${coord.x}, Y:${coord.y}, Z:${coord.z}, FX:${coord.fx}, FY:${coord.fy}, FZ:${coord.fz}\n`
     ));
@@ -30,7 +50,7 @@ app.post('/api/generate', (req, res) => {
     res.end();
 });
 
-app.get('/api/fetch', (req, res) => {
+app.get('/api/getFile', (req, res) => {
     res.sendFile(`${process.cwd()}/info.txt`);
 });
 

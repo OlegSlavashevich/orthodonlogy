@@ -4,6 +4,7 @@ import './style.scss';
 
 interface IPops {
     coords?: ICoord[];
+    setSelectedCoords?: (coords: ICoord[]) => void;
 }
 
 export interface ICoord {
@@ -16,6 +17,12 @@ export interface ICoord {
 }
 
 const CoordsTable: FunctionComponent<IPops> = (props: IPops) => {
+    const rowSelection = {
+        onChange: (selectedRowKeys: React.Key[], selectedRows: ICoord[]) => {
+            if (props.setSelectedCoords) props.setSelectedCoords(selectedRows)
+        }
+    };
+
     const columns = [
         {
           title: 'X',
@@ -50,7 +57,12 @@ const CoordsTable: FunctionComponent<IPops> = (props: IPops) => {
     ];
 
     return (
-        <Table style={{ width: '100%', height: '100%', maxHeight: '100%' }} pagination={false} columns={columns} dataSource={props.coords} />
+        <Table
+            style={{ width: '100%', height: '100%', maxHeight: '100%' }}
+            rowSelection={rowSelection}
+            pagination={false}
+            columns={columns}
+            dataSource={props.coords?.map((coord, index) => ({ key: index, ...coord }))} />
     )
 };
 

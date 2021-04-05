@@ -1,4 +1,4 @@
-import React, { Suspense, useEffect, useState } from "react";
+import React, { Suspense, useState } from "react";
 import { Canvas } from "react-three-fiber";
 import { Vector3 } from 'three';
 import { OrbitControls } from "@react-three/drei";
@@ -13,22 +13,36 @@ import axios from "axios";
 import { saveAs } from 'file-saver';
 
 function App() {
+    const [isGeometryLoaded, setIsGeometryLoaded] = useState<boolean>(false);
+
+    const [geometryLink, setGeometryLink] = useState<string>('http://localhost:8000/api/getGeometry');
     const [clickedPoint, setClickedPoint] = useState<Vector3>();
-
     const [coords, setCoords] = useState<ICoord[]>([]);
-
-    useEffect(() => {
-        console.log(coords);
-    }, [coords]);
+    const [selectedCoords, setSelectedCoords] = useState<ICoord[]>([]);
 
     function generateFile() {
-        axios.post('http://localhost:8000/api/generate', coords)
-            .then(() => axios.get('http://localhost:8000/api/fetch', { responseType: 'blob' }))
+        axios.post('http://localhost:8000/api/generateFile', coords)
+            .then(() => axios.get('http://localhost:8000/api/getFile', { responseType: 'blob' }))
             .then((res) => {
                     const textBlob = new Blob([res.data], { type: 'application/text' });
                     saveAs(textBlob, 'result.txt');
             }
         );
+    }
+
+    function uploadGeometry(event: any) {
+        const file = event.target.files[0];
+        const formData = new FormData();
+        formData.append('geometry', file);
+        axios.post('http://localhost:8000/api/uploadGeometry', formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data'
+            }
+        }).then((res) => {
+            if (res.data === 'false' && res.data === 'error') return;
+            setGeometryLink(`http://localhost:8000/api/getGeometry/${res.data}`);
+            setIsGeometryLoaded(true);
+        });
     }
 
     function handleValuesChange(values: Values): void {
@@ -67,12 +81,19 @@ function App() {
                 <Layout.Content>
                     <Layout style={{ height: '100%' }}>
                         <Layout.Content style={{ height: '100%' }}>
-                            <Canvas camera={{ position: [0, 50, 50] }}>
-                                <Suspense fallback={null}>
-                                    <Model coords={coords} setClickedPoint={setClickedPoint}/>
-                                </Suspense>
-                                <OrbitControls />
-                            </Canvas>
+                            {isGeometryLoaded
+                                ? <Canvas camera={{ position: [0, 50, 50] }}>
+                                    <Suspense fallback={null}>
+                                        <Model 
+                                            geometryLink={geometryLink}
+                                            coords={coords}
+                                            selectedCoords={selectedCoords}
+                                            setClickedPoint={setClickedPoint}/>
+                                    </Suspense>
+                                    <OrbitControls />
+                                </Canvas>
+                                : <input onChange={uploadGeometry} name="geometry" style={{ marginTop: '100px' }} type="file"/>
+                            }
                         </Layout.Content>
                         <Layout.Footer 
                             style={{
@@ -82,9 +103,19 @@ function App() {
                                 overflowY: 'scroll',
                                 backgroundColor: '#F5F5F5',
                                 boxShadow: 'inset -1px 0px 0px #E6E6E6'}}>
-                                    <div style={{ display: 'flex' }}><Typography.Title style={{ marginLeft: '40px' }} level={4}>Coords And Values table</Typography.Title>
-                            <Button style={{ margin: 'auto 40px auto auto' }} type="primary" onClick={generateFile}>Export to File</Button></div>
-                            <CoordsTable coords={coords}/>
+                                    <div style={{ display: 'flex' }}>
+                                        <Typography.Title
+                                            style={{ marginLeft: '40px' }}
+                                            level={4}>
+                                            Select to show in geometry
+                                        </Typography.Title>
+                                        <Button
+                                            style={{ margin: 'auto 40px auto auto' }}
+                                            type="primary" onClick={generateFile}>
+                                                Export to File
+                                        </Button>
+                                    </div>
+                            <CoordsTable setSelectedCoords={setSelectedCoords} coords={coords}/>
                         </Layout.Footer>
                     </Layout>
                 </Layout.Content>
