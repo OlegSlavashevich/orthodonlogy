@@ -17,12 +17,18 @@ app.use(bodyParser.json());
 app.use(express.static(process.cwd()+"/geometry/"));
 
 app.use(fileUpload({
-    limits: { fileSize: 50 * 1024 * 1024 },
+    limits: { fileSize: 50 * 1024 * 1024 * 1024 * 1024 * 1024 },
 }));
+
+const translateGeometryName = (geometryName) => {
+    const nameArray = geometryName.split('.');
+    nameArray[0] += Date.now().toString();
+    return nameArray.join('.');
+};
 
 app.post('/api/uploadGeometry', (req, res) => {
     const geometry = req.files.geometry;
-    const geometryName = geometry.name;
+    const geometryName = translateGeometryName(geometry.name);
     geometry.mv('./geometry/' + geometryName, (err) => {
         if (err) res.send(false);
         res.send(geometryName);

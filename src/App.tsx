@@ -4,7 +4,7 @@ import { Vector3 } from 'three';
 import { OrbitControls } from "@react-three/drei";
 import './App.css';
 import Model from './components/Model';
-import { Button, Layout, Typography } from 'antd';
+import { Button, Layout, Spin, Typography } from 'antd';
 import "antd/dist/antd.css";
 import CoordsView from "./components/CoordsVIew";
 import  CoordsTable, { ICoord } from "./components/CoordsTable";
@@ -15,12 +15,13 @@ import { saveAs } from 'file-saver';
 function App() {
     const [isGeometryLoaded, setIsGeometryLoaded] = useState<boolean>(false);
 
+    const [isLoadingGeometry, setIsLoadingGeometry] = useState<boolean>(false);
     const [geometryLink, setGeometryLink] = useState<string>('http://localhost:8000/api/getGeometry');
     const [clickedPoint, setClickedPoint] = useState<Vector3>();
     const [coords, setCoords] = useState<ICoord[]>([]);
     const [selectedCoords, setSelectedCoords] = useState<ICoord[]>([]);
 
-    function generateFile() {
+    function generateFile(): void {
         axios.post('http://localhost:8000/api/generateFile', coords)
             .then(() => axios.get('http://localhost:8000/api/getFile', { responseType: 'blob' }))
             .then((res) => {
@@ -30,7 +31,8 @@ function App() {
         );
     }
 
-    function uploadGeometry(event: any) {
+    function uploadGeometry(event: any): void {
+        setIsLoadingGeometry(true);
         const file = event.target.files[0];
         const formData = new FormData();
         formData.append('geometry', file);
@@ -42,6 +44,7 @@ function App() {
             if (res.data === 'false' && res.data === 'error') return;
             setGeometryLink(`http://localhost:8000/api/getGeometry/${res.data}`);
             setIsGeometryLoaded(true);
+            setIsLoadingGeometry(false);
         });
     }
 
@@ -58,6 +61,13 @@ function App() {
         newCoordsList.push(newCoord);
         setCoords(newCoordsList);
         setClickedPoint(undefined);
+    }
+
+    function getJSXWhenGeometryIsNotLoaded(isLoading: boolean) {
+        if (isLoading) {
+            return <Spin style={{ marginTop: '100px' }}/>
+        }
+        return <input onChange={uploadGeometry} name="geometry" style={{ marginTop: '100px' }} type="file"/>;
     }
 
     return (
@@ -92,7 +102,7 @@ function App() {
                                     </Suspense>
                                     <OrbitControls />
                                 </Canvas>
-                                : <input onChange={uploadGeometry} name="geometry" style={{ marginTop: '100px' }} type="file"/>
+                                : getJSXWhenGeometryIsNotLoaded(isLoadingGeometry)
                             }
                         </Layout.Content>
                         <Layout.Footer 
