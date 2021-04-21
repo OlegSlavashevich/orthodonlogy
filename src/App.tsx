@@ -18,8 +18,11 @@ function App() {
     const [isLoadingGeometry, setIsLoadingGeometry] = useState<boolean>(false);
     const [geometryLink, setGeometryLink] = useState<string>('http://localhost:8000/api/getGeometry');
     const [clickedPoint, setClickedPoint] = useState<Vector3>();
+    const [clickedCoord, setClickedCoord] = useState<ICoord>();
     const [coords, setCoords] = useState<ICoord[]>([]);
     const [selectedCoords, setSelectedCoords] = useState<ICoord[]>([]);
+
+    const [isAddToTable, setIsAddToTable] = useState<boolean>(false);
 
     function generateFile(): void {
         axios.post('http://localhost:8000/api/generateFile', coords)
@@ -61,6 +64,19 @@ function App() {
         newCoordsList.push(newCoord);
         setCoords(newCoordsList);
         setClickedPoint(undefined);
+        setIsAddToTable(!isAddToTable);
+    }
+
+    const handleForceChange = (clickedCoordForce: Values) => {
+        if (clickedPoint)
+            setClickedCoord({
+                x: clickedPoint.x,
+                y: clickedPoint.y,
+                z: clickedPoint.z,
+                fx: clickedCoordForce.fx,
+                fy: clickedCoordForce.fy,
+                fz: clickedCoordForce.fz,
+            });
     }
 
     function getJSXWhenGeometryIsNotLoaded(isLoading: boolean) {
@@ -86,7 +102,7 @@ function App() {
                         boxShadow: 'inset -1px 0px 0px #E6E6E6',
                     }}>
                     <CoordsView coords={clickedPoint}/>
-                    <ValueForm onClickAddButton={handleValuesChange}/>
+                    <ValueForm setClickedCoord={handleForceChange} onClickAddButton={handleValuesChange}/>
                 </Layout.Sider>
                 <Layout.Content>
                     <Layout style={{ height: '100%' }}>
@@ -94,7 +110,9 @@ function App() {
                             {isGeometryLoaded
                                 ? <Canvas camera={{ position: [0, 50, 50] }}>
                                     <Suspense fallback={null}>
-                                        <Model 
+                                        <Model
+                                            clickedCoord={clickedCoord}
+                                            isAddToTable={isAddToTable}
                                             geometryLink={geometryLink}
                                             coords={coords}
                                             selectedCoords={selectedCoords}

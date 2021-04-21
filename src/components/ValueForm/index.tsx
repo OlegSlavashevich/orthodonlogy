@@ -5,6 +5,7 @@ import "antd/dist/antd.css";
 
 interface IProps {
     onClickAddButton?: (values: Values) => void;
+    setClickedCoord?: (clickedCoordForce: Values) => void;
 }
 
 export interface Values {
@@ -28,6 +29,10 @@ const ValueForm: FunctionComponent<IProps> = (props: IProps)  => {
         setValues(defaultValue);
         if (props.onClickAddButton) props.onClickAddButton(values);
     }
+
+    const onShowVector = () => {
+        if (props.setClickedCoord) props.setClickedCoord(values);
+    };
 
     return (<div className="value-form">
                 <Typography.Title style={{ marginTop: '20px' }}  level={2}>
@@ -64,9 +69,14 @@ const ValueForm: FunctionComponent<IProps> = (props: IProps)  => {
                         onChange={(event) => onChangeValuesInput(event.target.value, 'fz')}/>
                 </div>
                 <Button
+                    onClick={onShowVector}
+                    style={{ marginTop: '40px', width: '80%', height: '50px', marginLeft: 'auto', marginRight: 'auto' }}>
+                        Show Vector
+                </Button>
+                <Button
                     onClick={() => handleClick()}
                     type="primary"
-                    style={{ marginTop: '60px', width: '80%', height: '50px', marginLeft: 'auto', marginRight: 'auto' }}>
+                    style={{ marginTop: '20px', width: '80%', height: '50px', marginLeft: 'auto', marginRight: 'auto' }}>
                         Add to table
                 </Button>
             </div>);

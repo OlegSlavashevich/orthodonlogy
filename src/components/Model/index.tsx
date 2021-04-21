@@ -8,7 +8,9 @@ import { ICoord } from '../CoordsTable';
 
 interface IProps {
     geometryLink: string;
+    isAddToTable: boolean;
     coords?: ICoord[];
+    clickedCoord?: ICoord;
     selectedCoords?: ICoord[];
     setClickedPoint?: (point: Vector3) => void;
 }
@@ -23,15 +25,25 @@ const Model: FunctionComponent<IProps> = (props: IProps) => {
     const ref = useRef<any>(null);
 
     const [pointCoords, setPointCoords] = useState<Vector3>(); 
-
+    const [clickedCoordVect, setClickedCoorVect] = useState<ICoord>();
     const [selectedCoords, setSelectedCoords] = useState<Vector3[]>();
 
     useEffect(() => {
         if (props?.coords?.length) {
             setPointCoords(new THREE.Vector3( 1, 0, 0 ));
         }
-    }, [props.coords]);
+    }, [props.isAddToTable]);
 
+    useEffect(() => {
+        setClickedCoorVect(undefined);
+    }, [pointCoords]);
+
+    useEffect(() => {
+        if (props.clickedCoord) {
+            setClickedCoorVect(props.clickedCoord);
+        }
+    }, [props.clickedCoord]);
+     
     useEffect(() => {
         if (props.selectedCoords?.length) {
             setSelectedCoords(props.selectedCoords.map((coord: ICoord) => {
@@ -47,15 +59,23 @@ const Model: FunctionComponent<IProps> = (props: IProps) => {
     });
 
     function handleGeometryClick(event: any): void {
+        console.log(event)
         setPointCoords(event.point);
         if (props.setClickedPoint) props.setClickedPoint(event.point);
     }
 
     return (
         <>
+            <mesh position={[-1, 0, 3]} ref={ref}>
+                <boxBufferGeometry args={[1, 1, 1]} attach="geometry" />
+                <meshPhongMaterial color={'red'} attach="material" />
+            </mesh>
+            {clickedCoordVect && <mesh position={[Number(clickedCoordVect.x), Number(clickedCoordVect.y), Number(clickedCoordVect.z)]}>
+                <arrowHelper args={[new THREE.Vector3(Number(clickedCoordVect.fx),Number(clickedCoordVect.fy),Number(clickedCoordVect.fz)).normalize(),, 15, 'red']} />
+            </mesh>}
             <mesh ref={ref} onClick={handleGeometryClick}>
                 <primitive object={geom} attach="geometry" />
-                <meshStandardMaterial color={"#FFD700"} />
+                <meshNormalMaterial attach="material" />
             </mesh>
             <mesh position={pointCoords} ref={ref}>
                 <sphereGeometry attach="geometry" args={[0.4, 16, 16]} />
