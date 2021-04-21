@@ -26,7 +26,6 @@ const Model: FunctionComponent<IProps> = (props: IProps) => {
 
     const [pointCoords, setPointCoords] = useState<Vector3>(); 
     const [clickedCoordVect, setClickedCoorVect] = useState<ICoord>();
-    const [selectedCoords, setSelectedCoords] = useState<Vector3[]>();
 
     useEffect(() => {
         if (props?.coords?.length) {
@@ -43,16 +42,7 @@ const Model: FunctionComponent<IProps> = (props: IProps) => {
             setClickedCoorVect(props.clickedCoord);
         }
     }, [props.clickedCoord]);
-     
-    useEffect(() => {
-        if (props.selectedCoords?.length) {
-            setSelectedCoords(props.selectedCoords.map((coord: ICoord) => {
-                return new Vector3(Number(coord.x), Number(coord.y), Number(coord.z));
-            }));
-        } else {
-            setSelectedCoords([new THREE.Vector3( 1, 0, 0 )]);
-        }
-    }, [props.selectedCoords]);
+
 
     useEffect(() => {
         if (ref.current) camera.lookAt(ref.current.position);
@@ -81,9 +71,9 @@ const Model: FunctionComponent<IProps> = (props: IProps) => {
                 <sphereGeometry attach="geometry" args={[0.4, 16, 16]} />
                 <meshStandardMaterial color={"red"} />
             </mesh>
-            {selectedCoords && selectedCoords.map((coord, index) => (
-                <mesh key={index} position={coord} ref={ref}>
-                    <sphereGeometry attach="geometry" args={[0.4, 16, 16]} />
+            {props.selectedCoords && props.selectedCoords.map((coord, index) => (
+                <mesh key={index} position={new Vector3(Number(coord.x), Number(coord.y), Number(coord.z))} ref={ref}>
+                    <arrowHelper args={[new THREE.Vector3(Number(coord.fx),Number(coord.fy),Number(coord.fz)).normalize(),, 15, 'green']} />
                     <meshStandardMaterial color={"green"} />
                 </mesh>
             ))}
