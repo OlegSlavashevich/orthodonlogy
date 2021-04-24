@@ -13,7 +13,7 @@ import axios from "axios";
 import { saveAs } from 'file-saver';
 
 function App() {
-    const [isGeometryLoaded, setIsGeometryLoaded] = useState<boolean>(false);
+    const [isGeometryLoaded, setIsGeometryLoaded] = useState<boolean>(true);
 
     const [isLoadingGeometry, setIsLoadingGeometry] = useState<boolean>(false);
     const [geometryLink, setGeometryLink] = useState<string>('http://localhost:8000/api/getGeometry');

@@ -20,9 +20,14 @@ const Model: FunctionComponent<IProps> = (props: IProps) => {
     const axesHelper = new THREE.AxesHelper( 1000 );
     scene.add(axesHelper);
 
-    const geom: THREE.BufferGeometry = useLoader(STLLoader, props.geometryLink).center();
+    const geom: THREE.BufferGeometry = useLoader(STLLoader, 'jawFull.stl').center();
     geom.name = 'MyCube_s';
     const ref = useRef<any>(null);
+
+    useEffect(() => {
+        geom.rotateX(-Math.PI/2);
+        geom.rotateY(Math.PI);
+    }, [geom]);
 
     const [pointCoords, setPointCoords] = useState<Vector3>(); 
     const [clickedCoordVect, setClickedCoorVect] = useState<ICoord>();
@@ -65,7 +70,7 @@ const Model: FunctionComponent<IProps> = (props: IProps) => {
             </mesh>}
             <mesh ref={ref} onClick={handleGeometryClick}>
                 <primitive object={geom} attach="geometry" />
-                <meshNormalMaterial attach="material" />
+                <meshNormalMaterial color="#1E90FF" />
             </mesh>
             <mesh position={pointCoords} ref={ref}>
                 <sphereGeometry attach="geometry" args={[0.4, 16, 16]} />
