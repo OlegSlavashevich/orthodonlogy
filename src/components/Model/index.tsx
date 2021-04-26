@@ -20,13 +20,12 @@ const Model: FunctionComponent<IProps> = (props: IProps) => {
     const axesHelper = new THREE.AxesHelper( 1000 );
     scene.add(axesHelper);
 
-    const geom: THREE.BufferGeometry = useLoader(STLLoader, 'jawFull.stl').center();
+    const geom: THREE.BufferGeometry = useLoader(STLLoader, props?.geometryLink).center();
     geom.name = 'MyCube_s';
     const ref = useRef<any>(null);
 
     useEffect(() => {
-        geom.rotateX(-Math.PI/2);
-        geom.rotateY(Math.PI);
+        geom.rotateX(Math.PI/2);
     }, [geom]);
 
     const [pointCoords, setPointCoords] = useState<Vector3>(); 
