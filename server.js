@@ -2,6 +2,8 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import fs from 'fs';
 import fileUpload from 'express-fileupload';
+import { spawn } from 'child_process';
+import path from 'path';
 
 const PORT = 8000;
 const app = express();
@@ -37,6 +39,16 @@ app.post('/api/uploadGeometry', (req, res) => {
 
 app.get('/api/getGeometry/*', (req, res) => {
     res.sendFile(`${process.cwd()}/geometry/${req.url.split('/')[req.url.split('/').length - 1]}`);
+});
+
+app.get('/api/generateMesh', (req, res) => {
+    function runScript() {
+        return spawn('python', [
+              path.join(process.cwd(), 'mesher.py'),
+        ]);
+    }
+    runScript();
+    res.send();
 });
 
 app.post('/api/generateFile', (req, res) => {

@@ -28,8 +28,8 @@ function App() {
         axios.post('http://localhost:8000/api/generateFile', coords)
             .then(() => axios.get('http://localhost:8000/api/getFile', { responseType: 'blob' }))
             .then((res) => {
-                    const textBlob = new Blob([res.data], { type: 'application/text' });
-                    saveAs(textBlob, 'result.txt');
+                const textBlob = new Blob([res.data], { type: 'application/text' });
+                saveAs(textBlob, 'result.txt');
             }
         );
     }
