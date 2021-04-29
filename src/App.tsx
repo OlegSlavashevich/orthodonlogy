@@ -24,6 +24,8 @@ function App() {
 
     const [isAddToTable, setIsAddToTable] = useState<boolean>(false);
 
+    const [isWireframe, setIsWireframe] = useState<boolean>(false);
+
     function generateFile(): void {
         axios.post('http://localhost:8000/api/generateFile', coords)
             .then(() => axios.get('http://localhost:8000/api/getFile', { responseType: 'blob' }))
@@ -45,10 +47,25 @@ function App() {
             }
         }).then((res) => {
             if (res.data === 'false' && res.data === 'error') return;
-            setGeometryLink(`http://localhost:8000/api/getGeometry/${res.data}`);
+            setGeometryLink(`http://localhost:8000/api/getGeometry`);
             setIsGeometryLoaded(true);
             setIsLoadingGeometry(false);
         });
+    }
+
+    function generateMesh(): void {
+        setIsLoadingGeometry(true);
+        const fileName = geometryLink.split('/')[geometryLink.split('/').length - 1];
+        axios.post('http://localhost:8000/api/generateMesh', {
+            fileName: fileName
+        })
+            .then(() => {
+                setTimeout(() => {
+                    setGeometryLink('http://localhost:8000/api/getMesh');
+                    setIsWireframe(true);
+                    setIsLoadingGeometry(false);
+                }, 3000);
+            });
     }
 
     function handleValuesChange(values: Values): void {
@@ -101,8 +118,15 @@ function App() {
                         backgroundColor: '#F5F5F5',
                         boxShadow: 'inset -1px 0px 0px #E6E6E6',
                     }}>
-                    <CoordsView coords={clickedPoint}/>
-                    <ValueForm setClickedCoord={handleForceChange} onClickAddButton={handleValuesChange}/>
+                    <Button
+                        disabled={!isGeometryLoaded}
+                        onClick={() => generateMesh()}
+                        type="primary"
+                        style={{ marginTop: '20px', width: '80%', height: '50px', marginLeft: 'auto', marginRight: 'auto' }}>
+                            Generate Mesh
+                    </Button>
+                    {/* <CoordsView coords={clickedPoint}/>
+                    <ValueForm setClickedCoord={handleForceChange} onClickAddButton={handleValuesChange}/> */}
                 </Layout.Sider>
                 <Layout.Content>
                     <Layout style={{ height: '100%' }}>
@@ -116,6 +140,7 @@ function App() {
                                             geometryLink={geometryLink}
                                             coords={coords}
                                             selectedCoords={selectedCoords}
+                                            isWireframe={isWireframe}
                                             setClickedPoint={setClickedPoint}/>
                                     </Suspense>
                                     <OrbitControls />

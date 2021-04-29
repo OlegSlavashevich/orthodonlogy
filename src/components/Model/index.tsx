@@ -12,6 +12,7 @@ interface IProps {
     coords?: ICoord[];
     clickedCoord?: ICoord;
     selectedCoords?: ICoord[];
+    isWireframe?: boolean;
     setClickedPoint?: (point: Vector3) => void;
 }
 
@@ -69,7 +70,7 @@ const Model: FunctionComponent<IProps> = (props: IProps) => {
             </mesh>}
             <mesh ref={ref} onClick={handleGeometryClick}>
                 <primitive object={geom} attach="geometry" />
-                <meshNormalMaterial color="#1E90FF" />
+                <meshNormalMaterial color="#1E90FF" wireframe={props.isWireframe}/>
             </mesh>
             <mesh position={pointCoords} ref={ref}>
                 <sphereGeometry attach="geometry" args={[0.4, 16, 16]} />

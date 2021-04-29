@@ -1,6 +1,10 @@
 import gmsh
 import sys
 import math
+import os
+import json
+
+dir = os.path.abspath(os.curdir)
 
 gmsh.initialize()
 gmsh.option.setNumber("General.Terminal", 1)
@@ -10,7 +14,7 @@ gmsh.option.setNumber("Mesh.CharacteristicLengthMax", 10)
 gmsh.option.setNumber("Mesh.Optimize", 1)
 gmsh.option.setNumber("Mesh.QualityType", 2)
 
-gmsh.merge("C:/Users/ASUS/test.stl")
+gmsh.merge(dir + '/geometry/' + str(sys.argv[1]))
 n = gmsh.model.getDimension()
 s = gmsh.model.getEntities(n)
 l = gmsh.model.geo.addSurfaceLoop([s[i][1] for i in range(len(s))])
@@ -19,7 +23,6 @@ gmsh.model.geo.synchronize()
 
 gmsh.model.mesh.generate(3)
 
-print("TEST")
 print(gmsh.model.mesh.getNodes())
 
 gmsh.write("mesh.stl")
@@ -57,6 +60,11 @@ for id, item in enumerate(fileLines):
     itemList[0] = 'E'
     tetra = ', '.join(itemList)
     tetraedrs.append(tetra)
+
+json_string = json.dumps(nodes)
+
+with open('nodes.json', 'w') as f:
+    json.dump(nodes, f)
 
 f = open('apdlmesh.txt', 'w')
 

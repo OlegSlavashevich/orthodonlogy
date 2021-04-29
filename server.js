@@ -31,45 +31,52 @@ const translateGeometryName = (geometryName) => {
 app.post('/api/uploadGeometry', (req, res) => {
     const geometry = req.files.geometry;
     const geometryName = translateGeometryName(geometry.name);
-    geometry.mv('./geometry/' + geometryName, (err) => {
+    geometry.mv('./geometry/geometry.stl', (err) => {
         if (err) res.send(false);
         res.send(geometryName);
     });
 });
 
-app.get('/api/getGeometry/*', (req, res) => {
-    res.sendFile(`${process.cwd()}/geometry/${req.url.split('/')[req.url.split('/').length - 1]}`);
+app.get('/api/getGeometry/', (req, res) => {
+    res.sendFile(`${process.cwd()}/geometry/geometry.stl`);
 });
 
-app.get('/api/generateMesh', (req, res) => {
+app.post('/api/generateMesh', (req, res) => {
+    const geometryName = req.body.fileName;
+    console.log(req.body);
     function runScript() {
         return spawn('python', [
               path.join(process.cwd(), 'mesher.py'),
+              geometryName
         ]);
     }
     runScript();
-    res.send();
+    res.send(true);
+});
+
+app.get('/api/getMesh', (req, res) => {
+    res.sendFile(`${process.cwd()}/mesh.stl`);
 });
 
 app.post('/api/generateFile', (req, res) => {
-    const coords = req.body.map((coord) => (
-        `X:${coord.x}, Y:${coord.y}, Z:${coord.z}, FX:${coord.fx}, FY:${coord.fy}, FZ:${coord.fz}\n`
-    ));
-    fs.writeFile('info.txt', coords[0], (err) => {
-        if (err) throw err;
-        console.log('Saved!');
-    });
-    for (let i = 1; i < coords.length; i++) {
-        fs.appendFile('info.txt', coords[i], (err) => {
-            if (err) throw err;
-            console.log('Saved!');
-        });
-    } 
+    // const coords = req.body.map((coord) => (
+    //     `X:${coord.x}, Y:${coord.y}, Z:${coord.z}, FX:${coord.fx}, FY:${coord.fy}, FZ:${coord.fz}\n`
+    // ));
+    // fs.writeFile('info.txt', coords[0], (err) => {
+    //     if (err) throw err;
+    //     console.log('Saved!');
+    // });
+    // for (let i = 1; i < coords.length; i++) {
+    //     fs.appendFile('info.txt', coords[i], (err) => {
+    //         if (err) throw err;
+    //         console.log('Saved!');
+    //     });
+    // } 
     res.end();
 });
 
 app.get('/api/getFile', (req, res) => {
-    res.sendFile(`${process.cwd()}/info.txt`);
+    res.sendFile(`${process.cwd()}/apdlmesh.txt`);
 });
 
 app.listen(PORT, () => {
