@@ -43,11 +43,14 @@ app.get('/api/getGeometry/', (req, res) => {
 
 app.post('/api/generateMesh', (req, res) => {
     const geometryName = req.body.fileName;
-    console.log(req.body);
+    const young = req.body.young;
+    const poisson = req.body.poisson;
     function runScript() {
         return spawn('python', [
               path.join(process.cwd(), 'mesher.py'),
-              geometryName
+              geometryName,
+              young,
+              poisson
         ]);
     }
     runScript();

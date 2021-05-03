@@ -35,7 +35,7 @@ const ValueForm: FunctionComponent<IProps> = (props: IProps)  => {
     };
 
     return (<div className="value-form">
-                <Typography.Title style={{ marginTop: '20px' }}  level={2}>
+                <Typography.Title style={{ marginTop: '10px' }}  level={2}>
                     Force
                 </Typography.Title>
                 <div className="value-form__value">
@@ -70,13 +70,13 @@ const ValueForm: FunctionComponent<IProps> = (props: IProps)  => {
                 </div>
                 <Button
                     onClick={onShowVector}
-                    style={{ marginTop: '40px', width: '80%', height: '50px', marginLeft: 'auto', marginRight: 'auto' }}>
+                    style={{ marginTop: '20px', width: '80%', height: '50px', marginLeft: 'auto', marginRight: 'auto' }}>
                         Show Vector
                 </Button>
                 <Button
                     onClick={() => handleClick()}
                     type="primary"
-                    style={{ marginTop: '20px', width: '80%', height: '50px', marginLeft: 'auto', marginRight: 'auto' }}>
+                    style={{ marginTop: '10px', width: '80%', height: '50px', marginLeft: 'auto', marginRight: 'auto' }}>
                         Add to table
                 </Button>
             </div>);

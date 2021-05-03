@@ -4,7 +4,7 @@ import { Vector3 } from 'three';
 import { OrbitControls } from "@react-three/drei";
 import './App.css';
 import Model from './components/Model';
-import { Button, Layout, Spin, Typography } from 'antd';
+import { Button, Input, Layout, Spin, Typography } from 'antd';
 import "antd/dist/antd.css";
 import CoordsView from "./components/CoordsVIew";
 import  CoordsTable, { ICoord } from "./components/CoordsTable";
@@ -14,6 +14,9 @@ import { saveAs } from 'file-saver';
 
 function App() {
     const [isGeometryLoaded, setIsGeometryLoaded] = useState<boolean>(false);
+
+    const [young, setYoung] = useState<string>('');
+    const [poisson, setPoisson] = useState<string>('');
 
     const [isLoadingGeometry, setIsLoadingGeometry] = useState<boolean>(false);
     const [geometryLink, setGeometryLink] = useState<string>('http://localhost:8000/api/getGeometry');
@@ -57,7 +60,9 @@ function App() {
         setIsLoadingGeometry(true);
         const fileName = geometryLink.split('/')[geometryLink.split('/').length - 1];
         axios.post('http://localhost:8000/api/generateMesh', {
-            fileName: fileName
+            fileName: 'geometry.stl',
+            young: young,
+            poisson: poisson
         })
             .then(() => {
                 setTimeout(() => {
@@ -118,15 +123,39 @@ function App() {
                         backgroundColor: '#F5F5F5',
                         boxShadow: 'inset -1px 0px 0px #E6E6E6',
                     }}>
+                    <div style={{ display: 'flex', width: '80%', margin: '0 auto' }}>
+                        <div className="value-form__value">
+                            <Typography.Title 
+                                style={{ margin: 'auto 5px auto 0' }}
+                                level={4}>
+                                E: 
+                            </Typography.Title>
+                            <Input
+                                value={young}
+                                onChange={(e) => setYoung(e.target.value)}
+                            />
+                        </div>
+                        <div className="value-form__value">
+                            <Typography.Title 
+                                style={{ margin: 'auto 5px auto 5px' }}
+                                level={4}>
+                                μ: 
+                            </Typography.Title>
+                            <Input
+                                value={poisson}
+                                onChange={(e) => setPoisson(e.target.value)}
+                            />
+                        </div>
+                    </div>
                     <Button
-                        disabled={!isGeometryLoaded}
+                        disabled={!(isGeometryLoaded && young && poisson)}
                         onClick={() => generateMesh()}
                         type="primary"
                         style={{ marginTop: '20px', width: '80%', height: '50px', marginLeft: 'auto', marginRight: 'auto' }}>
                             Generate Mesh
                     </Button>
-                    {/* <CoordsView coords={clickedPoint}/>
-                    <ValueForm setClickedCoord={handleForceChange} onClickAddButton={handleValuesChange}/> */}
+                    {isWireframe && <><CoordsView coords={clickedPoint}/>
+                    <ValueForm setClickedCoord={handleForceChange} onClickAddButton={handleValuesChange}/></>}
                 </Layout.Sider>
                 <Layout.Content>
                     <Layout style={{ height: '100%' }}>
@@ -143,7 +172,6 @@ function App() {
                                             isWireframe={isWireframe}
                                             setClickedPoint={setClickedPoint}/>
                                     </Suspense>
-                                    <OrbitControls />
                                 </Canvas>
                                 : getJSXWhenGeometryIsNotLoaded(isLoadingGeometry)
                             }

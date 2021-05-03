@@ -7,6 +7,7 @@ import json
 dir = os.path.abspath(os.curdir)
 
 gmsh.initialize()
+
 gmsh.option.setNumber("General.Terminal", 1)
 gmsh.option.setNumber("Mesh.Algorithm", 8)
 gmsh.option.setNumber("Mesh.CharacteristicLengthMin", 1)
@@ -76,8 +77,14 @@ f.write('/VIEW,1,1,1,1\n')
 f.write('/ANGLE,1\n')
 f.write('/VUP,,Z\n')
 f.write('/ESHAPE,0\n')
-f.write('MP,EX,1,2e11\n')
-f.write('MP,PRXY,1,0.3\n')
+
+if sys.argv[2] and sys.argv[3]:
+    f.write(f'MP,EX,1,{sys.argv[2]}\n')
+    f.write(f'MP,PRXY,1,{sys.argv[3]}\n')
+else:
+    f.write('MP,EX,1,2e11\n')
+    f.write('MP,PRXY,1,0.3\n')
+
 f.write('!nodes\n')
 
 for node in nodes:
