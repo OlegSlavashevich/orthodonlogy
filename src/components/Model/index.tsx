@@ -6,7 +6,7 @@ import './style.scss';
 import { Vector3 } from 'three';
 import { ICoord } from '../CoordsTable';
 import { OrbitControls } from '@react-three/drei';
-import { debug } from 'node:console';
+import { ILimitation } from '../Displacement';
 
 interface IProps {
     geometryLink: string;
@@ -16,8 +16,10 @@ interface IProps {
     selectedCoords?: ICoord[];
     isWireframe?: boolean;
     nodes?: number[][];
+    limit?: ILimitation;
     setClickedPoint?: (point: Vector3) => void;
     setClickedNode?: (node: number) => void;
+    setDisplacementNode?: (node: number[][]) => void;
 }
 
 const Model: FunctionComponent<IProps> = (props: IProps) => {
@@ -32,6 +34,27 @@ const Model: FunctionComponent<IProps> = (props: IProps) => {
     THREE.Object3D.DefaultUp.set(0, 0, 1);
     const [pointCoords, setPointCoords] = useState<Vector3>(); 
     const [clickedCoordVect, setClickedCoorVect] = useState<ICoord>();
+
+    const [displacementNodes, setDisplacementNodes] = useState<number[][]>();
+
+    useEffect(() => {
+        if (props.limit && props.nodes) {
+            findIntersectionWithGeometry(props.limit, props.nodes);
+        }
+    }, [props.limit]);
+
+    const findIntersectionWithGeometry = (limit: ILimitation, nodes: number[][]) => {
+        let tmpNodes = [...nodes];
+        let sortedNodes = tmpNodes.filter((node) => {
+            return (
+                Number(limit.xmin) <= node[1] && node[1] <= Number(limit.xmax)
+                && Number(limit.ymin) <= node[2] && node[2] <= Number(limit.ymax)
+                && Number(limit.zmin) <= node[3] && node[3] <= Number(limit.zmax)
+            );
+        });
+        setDisplacementNodes(sortedNodes);
+        if (props.setDisplacementNode) props.setDisplacementNode(sortedNodes);
+    };
 
     camera.up.set(0,0,1);
 
@@ -102,10 +125,19 @@ const Model: FunctionComponent<IProps> = (props: IProps) => {
                 {!props.isWireframe && <meshNormalMaterial color="#1E90FF" />}
                 
             </mesh>
-            <mesh position={[-1, 0, 3]}>
-                <boxBufferGeometry args={[1, 1, 1]} attach="geometry" />
-                <meshPhongMaterial color={'red'} attach="material" />
-            </mesh>
+            {props.limit && 
+                <mesh position={[
+                    (Number(props.limit.xmin) + Number(props.limit.xmax)) / 2, 
+                    (Number(props.limit.ymin) + Number(props.limit.ymax)) / 2,
+                    (Number(props.limit.zmin) + Number(props.limit.zmax)) / 2
+                ]}>
+                    <boxBufferGeometry args={[
+                        Math.abs(Number(props.limit.xmin) - Number(props.limit.xmax)),
+                        Math.abs(Number(props.limit.ymin) - Number(props.limit.ymax)),
+                        Math.abs(Number(props.limit.zmin) - Number(props.limit.zmax))]} attach="geometry"/>
+                    <meshPhongMaterial color={'#000000'} attach="material" wireframe/>
+                </mesh>
+            }
             {clickedCoordVect && <mesh position={[Number(clickedCoordVect.x), Number(clickedCoordVect.y), Number(clickedCoordVect.z)]}>
                 <arrowHelper args={[new THREE.Vector3(Number(clickedCoordVect.fx),Number(clickedCoordVect.fy),Number(clickedCoordVect.fz)).normalize(),, 15, 'red']} />
             </mesh>}
@@ -113,6 +145,12 @@ const Model: FunctionComponent<IProps> = (props: IProps) => {
                 <sphereGeometry attach="geometry" args={[0.4, 16, 16]} />
                 <meshStandardMaterial color={"red"} />
             </mesh>
+            {displacementNodes && displacementNodes.map((node) => (
+                <mesh position={new THREE.Vector3(node[1], node[2], node[3])}>
+                    <sphereGeometry attach="geometry" args={[0.4, 16, 16]} />
+                    <meshStandardMaterial color={"green"} />
+                </mesh>
+            ))}
             {props.selectedCoords && props.selectedCoords.map((coord, index) => (
                 <mesh key={index} position={new Vector3(Number(coord.x), Number(coord.y), Number(coord.z))}>
                     <arrowHelper args={[new THREE.Vector3(Number(coord.fx),Number(coord.fy),Number(coord.fz)).normalize(),, 15, 'green']} />

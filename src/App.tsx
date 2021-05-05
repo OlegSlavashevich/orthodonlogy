@@ -9,6 +9,7 @@ import  CoordsTable, { ICoord } from "./components/CoordsTable";
 import ValueForm, { Values } from "./components/ValueForm";
 import axios from "axios";
 import { saveAs } from 'file-saver';
+import Displacement, { ILimitation } from "./components/Displacement";
 
 function App() {
     const [isGeometryLoaded, setIsGeometryLoaded] = useState<boolean>(false);
@@ -30,6 +31,9 @@ function App() {
 
     const [nodes, setNodes] = useState<number[][]>();
     const [clickedNode, setClickedNode] = useState<number>();
+
+    const [limit, setLimit] = useState<ILimitation>();
+    const [displaceNodes, setDisplaceNodes] = useState<number[][]>();
 
     function getFile(): void {
         axios.get('http://localhost:8000/api/getFile', { responseType: 'blob' })
@@ -92,9 +96,9 @@ function App() {
         if (Number(newCoord.fx)) force.push(`F, ${newCoord.node}, FX, ${newCoord.fx}\n`);
         if (Number(newCoord.fy)) force.push(`F, ${newCoord.node}, FY, ${newCoord.fy}\n`);
         if (Number(newCoord.fz)) force.push(`F, ${newCoord.node}, FZ, ${newCoord.fz}`);
-        axios.post('http://localhost:8000/api/addForce', {
-            force: force
-        })
+        axios.post('http://localhost:8000/api/addCommand', {
+            commands: force
+        });
         newCoordsList.push(newCoord);
         setCoords(newCoordsList);
         setClickedPoint(undefined);
@@ -113,6 +117,20 @@ function App() {
                 fz: clickedCoordForce.fz,
             });
     }
+
+    const handleClickAddDisplacement = () => {
+        if (displaceNodes) {
+            let displacement: string[] = [];
+            for (let i = 0; i < displaceNodes.length; i++) {
+                displacement.push(`D, ${displaceNodes[i][0]}, ALL, 0\n`);
+            }
+            axios.post('http://localhost:8000/api/addCommand', {
+                commands: displacement
+            });
+        
+        }
+
+    };
 
     function getJSXWhenGeometryIsNotLoaded(isLoading: boolean) {
         if (isLoading) {
@@ -172,7 +190,12 @@ function App() {
                             Generate Mesh
                     </Button>
                     {isWireframe && <Checkbox style={{ marginTop: '10px' }} onChange={(e) => setIsShowWireframe(e.target.checked)} defaultChecked={true}>Show Mesh</Checkbox>}
-                    {isWireframe && <><ValueForm setClickedCoord={handleForceChange} onClickAddButton={handleValuesChange}/></>}
+                    {isWireframe && <>
+                        <ValueForm setClickedCoord={handleForceChange} onClickAddButton={handleValuesChange}/>
+                        <Displacement
+                            onChangeLimit={setLimit}
+                            onClickAddDisplacement={handleClickAddDisplacement}/>
+                    </>}
                 </Layout.Sider>
                 <Layout.Content>
                     <Layout style={{ height: '100%' }}>
@@ -188,8 +211,10 @@ function App() {
                                             selectedCoords={selectedCoords}
                                             isWireframe={isShowWireframe}
                                             nodes={nodes}
+                                            limit={limit}
                                             setClickedPoint={setClickedPoint}
-                                            setClickedNode={setClickedNode} />
+                                            setClickedNode={setClickedNode}
+                                            setDisplacementNode={setDisplaceNodes}/>
                                     </Suspense>
                                 </Canvas>
                                 : getJSXWhenGeometryIsNotLoaded(isLoadingGeometry)

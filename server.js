@@ -65,10 +65,10 @@ app.get('/api/getNodes', (req, res) => {
     res.sendFile(`${process.cwd()}/nodes.json`)
 })
 
-app.post('/api/addForce', (req, res) => {
-    const force = req.body.force;
-    for (let i = 0; i < force.length; i++) {
-        fs.appendFile('apdlmesh.txt', force[i], (err) => {
+app.post('/api/addCommand', (req, res) => {
+    const commands = req.body.commands;
+    for (let i = 0; i < commands.length; i++) {
+        fs.appendFile('apdlmesh.txt', commands[i], (err) => {
             if (err) throw err;
             console.log('Saved!');
         });
@@ -77,6 +77,42 @@ app.post('/api/addForce', (req, res) => {
 });
 
 app.get('/api/getFile', (req, res) => {
+    fs.appendFileSync('apdlmesh.txt', 'FINISH\n', (err) => {
+        if (err) throw err;
+        console.log('Saved!'); 
+    });
+    fs.appendFileSync('apdlmesh.txt', '/SOL\n', (err) => {
+        if (err) throw err;
+        console.log('Saved!'); 
+    });
+    fs.appendFileSync('apdlmesh.txt', '/STATUS,SOLU\n', (err) => {
+        if (err) throw err;
+        console.log('Saved!'); 
+    });
+    fs.appendFileSync('apdlmesh.txt', 'SOLVE\n', (err) => {
+        if (err) throw err;
+        console.log('Saved!'); 
+    });
+    fs.appendFileSync('apdlmesh.txt', 'FINISH\n', (err) => {
+        if (err) throw err;
+        console.log('Saved!'); 
+    });
+    fs.appendFileSync('apdlmesh.txt', '/POST1\n', (err) => {
+        if (err) throw err;
+        console.log('Saved!'); 
+    });
+    fs.appendFileSync('apdlmesh.txt', '!*\n', (err) => {
+        if (err) throw err;
+        console.log('Saved!'); 
+    });
+    fs.appendFileSync('apdlmesh.txt', '/EFACET,1\n', (err) => {
+        if (err) throw err;
+        console.log('Saved!'); 
+    });
+    fs.appendFileSync('apdlmesh.txt', 'PLNSOL, S,EQV, 0,1.0\n', (err) => {
+        if (err) throw err;
+        console.log('Saved!'); 
+    });
     res.sendFile(`${process.cwd()}/apdlmesh.txt`);
 });
 
