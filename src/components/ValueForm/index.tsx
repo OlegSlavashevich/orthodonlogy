@@ -35,14 +35,11 @@ const ValueForm: FunctionComponent<IProps> = (props: IProps)  => {
     };
 
     return (<div className="value-form">
-                <Typography.Title style={{ marginTop: '10px' }}  level={2}>
-                    Force
-                </Typography.Title>
                 <div className="value-form__value">
                     <Typography.Title 
                         style={{ margin: 'auto 5px auto 0' }}
                         level={4}>
-                        X: 
+                        FX: 
                     </Typography.Title>
                     <Input
                         value={values.fx}
@@ -52,7 +49,7 @@ const ValueForm: FunctionComponent<IProps> = (props: IProps)  => {
                     <Typography.Title 
                         style={{ margin: 'auto 5px auto 0' }}
                         level={4}>
-                        Y: 
+                        FY: 
                     </Typography.Title>
                     <Input
                         value={values.fy}
@@ -62,7 +59,7 @@ const ValueForm: FunctionComponent<IProps> = (props: IProps)  => {
                     <Typography.Title 
                         style={{ margin: 'auto 5px auto 0' }}
                         level={4}>
-                        Z: 
+                        FZ: 
                     </Typography.Title>
                     <Input
                         value={values.fz}

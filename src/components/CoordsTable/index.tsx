@@ -14,6 +14,7 @@ export interface ICoord {
     fx: string | number;
     fy: string | number;
     fz: string | number;
+    node?: number;
 }
 
 const CoordsTable: FunctionComponent<IPops> = (props: IPops) => {
@@ -24,6 +25,11 @@ const CoordsTable: FunctionComponent<IPops> = (props: IPops) => {
     };
 
     const columns = [
+        {
+            title: 'Node',
+            dataIndex: 'node',
+            key: 'node',
+        },
         {
           title: 'X',
           dataIndex: 'x',

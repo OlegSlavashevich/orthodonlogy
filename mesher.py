@@ -39,9 +39,15 @@ fileLines = fileLines[3:]
 
 nodes = []
 
+nodesValue = []
+
 for id, item in enumerate(fileLines):
     if (item != '******* E L E M E N T S *************'):
         itemList = item.split(', ')
+        nodeVal = itemList.copy()
+        nodeVal[0], nodeVal[1], nodeVal[2], nodeVal[3] = int(
+            nodeVal[0]), float(nodeVal[1]), float(nodeVal[2]), float(nodeVal[3])
+        nodesValue.append(nodeVal)
         itemList.insert(0, 'N')
         node = ', '.join(itemList)
         nodes.append(node)
@@ -62,10 +68,8 @@ for id, item in enumerate(fileLines):
     tetra = ', '.join(itemList)
     tetraedrs.append(tetra)
 
-json_string = json.dumps(nodes)
-
 with open('nodes.json', 'w') as f:
-    json.dump(nodes, f)
+    json.dump(nodesValue, f)
 
 f = open('apdlmesh.txt', 'w')
 

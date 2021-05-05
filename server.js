@@ -61,20 +61,18 @@ app.get('/api/getMesh', (req, res) => {
     res.sendFile(`${process.cwd()}/mesh.stl`);
 });
 
-app.post('/api/generateFile', (req, res) => {
-    // const coords = req.body.map((coord) => (
-    //     `X:${coord.x}, Y:${coord.y}, Z:${coord.z}, FX:${coord.fx}, FY:${coord.fy}, FZ:${coord.fz}\n`
-    // ));
-    // fs.writeFile('info.txt', coords[0], (err) => {
-    //     if (err) throw err;
-    //     console.log('Saved!');
-    // });
-    // for (let i = 1; i < coords.length; i++) {
-    //     fs.appendFile('info.txt', coords[i], (err) => {
-    //         if (err) throw err;
-    //         console.log('Saved!');
-    //     });
-    // } 
+app.get('/api/getNodes', (req, res) => {
+    res.sendFile(`${process.cwd()}/nodes.json`)
+})
+
+app.post('/api/addForce', (req, res) => {
+    const force = req.body.force;
+    for (let i = 0; i < force.length; i++) {
+        fs.appendFile('apdlmesh.txt', force[i], (err) => {
+            if (err) throw err;
+            console.log('Saved!');
+        });
+    }
     res.end();
 });
 

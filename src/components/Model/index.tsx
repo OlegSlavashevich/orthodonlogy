@@ -6,6 +6,7 @@ import './style.scss';
 import { Vector3 } from 'three';
 import { ICoord } from '../CoordsTable';
 import { OrbitControls } from '@react-three/drei';
+import { debug } from 'node:console';
 
 interface IProps {
     geometryLink: string;
@@ -14,7 +15,9 @@ interface IProps {
     clickedCoord?: ICoord;
     selectedCoords?: ICoord[];
     isWireframe?: boolean;
+    nodes?: number[][];
     setClickedPoint?: (point: Vector3) => void;
+    setClickedNode?: (node: number) => void;
 }
 
 const Model: FunctionComponent<IProps> = (props: IProps) => {
@@ -53,10 +56,40 @@ const Model: FunctionComponent<IProps> = (props: IProps) => {
         if (ref.current) camera.lookAt(ref.current.position);
     });
 
+    function getDist(x1: number, y1: number, z1: number, 
+        x2: number, y2: number, z2: number): number {
+        return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2 + (z2 - z1) ** 2);
+    }
+
+    function getMinDistance(x1: number, y1: number, z1: number, nodes: number[][]): [number, number] {
+        let tmpNodes = [...nodes];
+        let min = getDist(x1, y1, z1, tmpNodes[0][1], tmpNodes[0][2], tmpNodes[0][3]);
+        let minIndex = 0;
+        for (let i = 1; i < tmpNodes.length; ++i) {
+            let localDist = getDist(x1, y1, z1, tmpNodes[i][1], tmpNodes[i][2], tmpNodes[i][3]);
+            if (localDist < min) {
+                min = localDist;
+                minIndex = i;
+            }
+        }
+        return [min, minIndex];
+    }
+
     function handleGeometryClick(event: any): void {
-        console.log(event)
-        setPointCoords(event.point);
-        if (props.setClickedPoint) props.setClickedPoint(event.point);
+        if (props.nodes?.length) {
+            const [nodeLen, nodeIndex] = getMinDistance(
+                event.point.x, event.point.y, event.point.z,
+                props.nodes
+            );
+            const node = new THREE.Vector3(
+                props.nodes[nodeIndex][1],
+                props.nodes[nodeIndex][2],
+                props.nodes[nodeIndex][3]
+            );
+            setPointCoords(node);
+            if (props.setClickedNode) props.setClickedNode(props.nodes[nodeIndex][0]);
+            if (props.setClickedPoint) props.setClickedPoint(node);
+        }
     }
 
     return (

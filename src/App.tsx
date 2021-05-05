@@ -1,12 +1,10 @@
-import React, { Suspense, useState } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import { Canvas } from "react-three-fiber";
 import { Vector3 } from 'three';
-import { OrbitControls } from "@react-three/drei";
 import './App.css';
 import Model from './components/Model';
-import { Button, Input, Layout, Spin, Typography } from 'antd';
+import { Button, Checkbox, Input, Layout, Spin, Typography } from 'antd';
 import "antd/dist/antd.css";
-import CoordsView from "./components/CoordsVIew";
 import  CoordsTable, { ICoord } from "./components/CoordsTable";
 import ValueForm, { Values } from "./components/ValueForm";
 import axios from "axios";
@@ -28,10 +26,13 @@ function App() {
     const [isAddToTable, setIsAddToTable] = useState<boolean>(false);
 
     const [isWireframe, setIsWireframe] = useState<boolean>(false);
+    const [isShowWireframe, setIsShowWireframe] = useState<boolean>(false);
 
-    function generateFile(): void {
-        axios.post('http://localhost:8000/api/generateFile', coords)
-            .then(() => axios.get('http://localhost:8000/api/getFile', { responseType: 'blob' }))
+    const [nodes, setNodes] = useState<number[][]>();
+    const [clickedNode, setClickedNode] = useState<number>();
+
+    function getFile(): void {
+        axios.get('http://localhost:8000/api/getFile', { responseType: 'blob' })
             .then((res) => {
                 const textBlob = new Blob([res.data], { type: 'application/text' });
                 saveAs(textBlob, 'result.txt');
@@ -67,9 +68,12 @@ function App() {
             .then(() => {
                 setTimeout(() => {
                     setGeometryLink('http://localhost:8000/api/getMesh');
+                    axios.get('http://localhost:8000/api/getNodes').then((res: any) => {
+                        setNodes(res.data);
+                    });
                     setIsWireframe(true);
                     setIsLoadingGeometry(false);
-                }, 3000);
+                }, 5000);
             });
     }
 
@@ -79,10 +83,18 @@ function App() {
             x: Number(clickedPoint?.x),
             y: Number(clickedPoint?.y),
             z: Number(clickedPoint?.z),
+            node: clickedNode,
             fx: values.fx,
             fy: values.fy,
             fz: values.fz
         };
+        let force: string[] = [];
+        if (Number(newCoord.fx)) force.push(`F, ${newCoord.node}, FX, ${newCoord.fx}\n`);
+        if (Number(newCoord.fy)) force.push(`F, ${newCoord.node}, FY, ${newCoord.fy}\n`);
+        if (Number(newCoord.fz)) force.push(`F, ${newCoord.node}, FZ, ${newCoord.fz}`);
+        axios.post('http://localhost:8000/api/addForce', {
+            force: force
+        })
         newCoordsList.push(newCoord);
         setCoords(newCoordsList);
         setClickedPoint(undefined);
@@ -95,6 +107,7 @@ function App() {
                 x: clickedPoint.x,
                 y: clickedPoint.y,
                 z: clickedPoint.z,
+                node: clickedNode,
                 fx: clickedCoordForce.fx,
                 fy: clickedCoordForce.fy,
                 fz: clickedCoordForce.fz,
@@ -107,6 +120,10 @@ function App() {
         }
         return <input onChange={uploadGeometry} name="geometry" style={{ marginTop: '100px' }} type="file"/>;
     }
+
+    useEffect(() => {
+        isWireframe && setIsShowWireframe(true);
+    }, [isWireframe]);
 
     return (
         <Layout className='App'>
@@ -154,8 +171,8 @@ function App() {
                         style={{ marginTop: '20px', width: '80%', height: '50px', marginLeft: 'auto', marginRight: 'auto' }}>
                             Generate Mesh
                     </Button>
-                    {isWireframe && <><CoordsView coords={clickedPoint}/>
-                    <ValueForm setClickedCoord={handleForceChange} onClickAddButton={handleValuesChange}/></>}
+                    {isWireframe && <Checkbox style={{ marginTop: '10px' }} onChange={(e) => setIsShowWireframe(e.target.checked)} defaultChecked={true}>Show Mesh</Checkbox>}
+                    {isWireframe && <><ValueForm setClickedCoord={handleForceChange} onClickAddButton={handleValuesChange}/></>}
                 </Layout.Sider>
                 <Layout.Content>
                     <Layout style={{ height: '100%' }}>
@@ -169,8 +186,10 @@ function App() {
                                             geometryLink={geometryLink}
                                             coords={coords}
                                             selectedCoords={selectedCoords}
-                                            isWireframe={isWireframe}
-                                            setClickedPoint={setClickedPoint}/>
+                                            isWireframe={isShowWireframe}
+                                            nodes={nodes}
+                                            setClickedPoint={setClickedPoint}
+                                            setClickedNode={setClickedNode} />
                                     </Suspense>
                                 </Canvas>
                                 : getJSXWhenGeometryIsNotLoaded(isLoadingGeometry)
@@ -192,7 +211,7 @@ function App() {
                                         </Typography.Title>
                                         <Button
                                             style={{ margin: 'auto 40px auto auto' }}
-                                            type="primary" onClick={generateFile}>
+                                            type="primary" onClick={getFile}>
                                                 Export to File
                                         </Button>
                                     </div>
