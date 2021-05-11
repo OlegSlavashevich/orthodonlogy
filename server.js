@@ -83,35 +83,27 @@ app.get('/api/getFile', (req, res) => {
     });
     fs.appendFileSync('apdlmesh.txt', '/SOL\n', (err) => {
         if (err) throw err;
-        console.log('Saved!'); 
     });
     fs.appendFileSync('apdlmesh.txt', '/STATUS,SOLU\n', (err) => {
         if (err) throw err;
-        console.log('Saved!'); 
     });
     fs.appendFileSync('apdlmesh.txt', 'SOLVE\n', (err) => {
         if (err) throw err;
-        console.log('Saved!'); 
     });
     fs.appendFileSync('apdlmesh.txt', 'FINISH\n', (err) => {
         if (err) throw err;
-        console.log('Saved!'); 
     });
     fs.appendFileSync('apdlmesh.txt', '/POST1\n', (err) => {
         if (err) throw err;
-        console.log('Saved!'); 
     });
     fs.appendFileSync('apdlmesh.txt', '!*\n', (err) => {
         if (err) throw err;
-        console.log('Saved!'); 
     });
     fs.appendFileSync('apdlmesh.txt', '/EFACET,1\n', (err) => {
         if (err) throw err;
-        console.log('Saved!'); 
     });
     fs.appendFileSync('apdlmesh.txt', 'PLNSOL, S,EQV, 0,1.0\n', (err) => {
         if (err) throw err;
-        console.log('Saved!'); 
     });
     res.sendFile(`${process.cwd()}/apdlmesh.txt`);
 });

@@ -135,7 +135,7 @@ const Model: FunctionComponent<IProps> = (props: IProps) => {
                         Math.abs(Number(props.limit.xmin) - Number(props.limit.xmax)),
                         Math.abs(Number(props.limit.ymin) - Number(props.limit.ymax)),
                         Math.abs(Number(props.limit.zmin) - Number(props.limit.zmax))]} attach="geometry"/>
-                    <meshPhongMaterial color={'#000000'} attach="material" wireframe/>
+                    <meshStandardMaterial transparent={true} color={'#1E90FF'} attach="material" opacity={0.3}/>
                 </mesh>
             }
             {clickedCoordVect && <mesh position={[Number(clickedCoordVect.x), Number(clickedCoordVect.y), Number(clickedCoordVect.z)]}>
