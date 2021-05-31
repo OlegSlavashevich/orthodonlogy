@@ -135,7 +135,7 @@ const Model: FunctionComponent<IProps> = (props: IProps) => {
                         Math.abs(Number(props.limit.xmin) - Number(props.limit.xmax)),
                         Math.abs(Number(props.limit.ymin) - Number(props.limit.ymax)),
                         Math.abs(Number(props.limit.zmin) - Number(props.limit.zmax))]} attach="geometry"/>
-                    <meshStandardMaterial transparent={true} color={'#1E90FF'} attach="material" opacity={0.3}/>
+                    <meshStandardMaterial transparent={true} color={'#D3D3D3'} attach="material" opacity={0.5}/>
                 </mesh>
             }
             {clickedCoordVect && <mesh position={[Number(clickedCoordVect.x), Number(clickedCoordVect.y), Number(clickedCoordVect.z)]}>
@@ -153,7 +153,7 @@ const Model: FunctionComponent<IProps> = (props: IProps) => {
             ))}
             {props.selectedCoords && props.selectedCoords.map((coord, index) => (
                 <mesh key={index} position={new Vector3(Number(coord.x), Number(coord.y), Number(coord.z))}>
-                    <arrowHelper args={[new THREE.Vector3(Number(coord.fx),Number(coord.fy),Number(coord.fz)).normalize(),, 15, 'green']} />
+                    <arrowHelper args={[new THREE.Vector3(Number(coord.fx),Number(coord.fy),Number(coord.fz)).normalize(),, 15, 'red']} />
                     <meshStandardMaterial color={"green"} />
                 </mesh>
             ))}

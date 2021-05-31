@@ -163,7 +163,7 @@ function App() {
                             <Typography.Title 
                                 style={{ margin: 'auto 5px auto 0' }}
                                 level={4}>
-                                E: 
+                                E(MPa): 
                             </Typography.Title>
                             <Input
                                 value={young}
