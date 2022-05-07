@@ -1,0 +1,4 @@
+*cfopen,Results_StressesOnly,txt,,append
+*vwrite,nx,ny,nz,ux,uy,uz
+(F11.7,',',F11.7,',',F11.7,',',F13.11,',',F13.11,',',F13.11)
+*cfclos

@@ -3,10 +3,14 @@ import * as THREE from "three";
 import { STLLoader } from "three/examples/jsm/loaders/STLLoader";
 import { useLoader, useThree } from "react-three-fiber";
 import './style.scss';
-import { Vector3 } from 'three';
+import { Float32BufferAttribute, Vector3, DoubleSide } from 'three';
 import { ICoord } from '../CoordsTable';
 import { OrbitControls } from '@react-three/drei';
 import { ILimitation } from '../Displacement';
+import { Lut } from "three/examples/jsm/math/Lut";
+import press from '../../data/pressure.json';
+import { useControls } from "leva";
+import { attachTypeApi } from 'antd/lib/message';
 
 interface IProps {
     geometryLink: string;
@@ -17,6 +21,7 @@ interface IProps {
     isWireframe?: boolean;
     nodes?: number[][];
     limit?: ILimitation;
+    pressure: number[][] | undefined;
     setClickedPoint?: (point: Vector3) => void;
     setClickedNode?: (node: number) => void;
     setDisplacementNode?: (node: number[][]) => void;
@@ -26,6 +31,15 @@ const Model: FunctionComponent<IProps> = (props: IProps) => {
     const { camera, scene } = useThree();
     const axesHelper = new THREE.AxesHelper( 1000 );
     scene.add(axesHelper);
+
+    // const { colorMap, min, max } = useControls({
+    //     colorMap: {
+    //       value: "rainbow",
+    //       options: ["rainbow", "cooltowarm", "blackbody", "grayscale"]
+    //     },
+    //     min: Math.min(...press),
+    //     max: Math.max(...press)
+    // });
 
     const geom: THREE.BufferGeometry = useLoader(STLLoader, props?.geometryLink);
     geom.name = 'MyCube_s';
@@ -63,6 +77,64 @@ const Model: FunctionComponent<IProps> = (props: IProps) => {
             setPointCoords(new THREE.Vector3( 1, 0, 0 ));
         }
     }, [props.isAddToTable]);
+
+    useEffect(() => {
+        if (props.pressure && props?.geometryLink) {
+            // createPressureArray()
+
+            const pressure: number[] = createPressureArray(props.pressure);
+
+            const lut = new Lut();
+            lut.setColorMap("rainbow");
+            lut.setMin(Math.min(...pressure));
+            lut.setMax(Math.max(...pressure));
+            const defaultColor = [];
+
+            geom.setAttribute("pressure", new Float32BufferAttribute(pressure, 1))
+
+            const test = [];
+
+            for (let i = 0; i < geom.attributes.position.array.length / 3; i++) {
+                test.push(geom.attributes.position.array[3 * i])
+            }
+
+            console.log(test);
+
+            for (let i = 0, n = geom.attributes.position.array.length / 3; i < n; ++i) {
+                defaultColor.push(Math.random(), Math.random(), Math.random());
+            }
+            geom.setAttribute("color", new Float32BufferAttribute(defaultColor, 3));
+
+            const pressures = geom.attributes.pressure;
+            const colors = geom.attributes.color;
+        
+            for (let i = 0; i < pressures.array.length; i++) {
+                const pressure = pressures.array[i];
+        
+                const color = lut.getColor(pressure);
+        
+                if (color === undefined) {
+                console.log("Unable to determine color for value:", pressure);
+                } else {
+                colors.setXYZ(i, color.r, color.g, color.b);
+                }
+            }
+            console.log(geom);
+        }
+    }, [props.pressure]);
+
+    const createPressureArray = (result: number[][]) => {
+        const pressure = [];
+        const distan = [];
+        const positions = geom.attributes.position.array
+        for (let i = 0; i < positions.length; i++) {
+            const [dist, index] = getMinDistance(positions[3 * i], positions[3 * i + 1], positions[3 * i + 2], result);
+            pressure.push(result[index][0]);
+            distan.push(dist);
+        }
+        console.log(pressure);
+        return pressure;
+    };
 
     useEffect(() => {
         setClickedCoorVect(undefined);
@@ -117,14 +189,16 @@ const Model: FunctionComponent<IProps> = (props: IProps) => {
 
     return (
         <>
-            <mesh ref={ref} onClick={handleGeometryClick}>
+            {!props.pressure && <mesh ref={ref} onClick={handleGeometryClick}>
                 <primitive object={geom} attach="geometry" />
-                {props.isWireframe 
+                {(props.isWireframe && !props.pressure) 
                     && <meshBasicMaterial color="#808080" wireframe={true}/>
                 }
-                {!props.isWireframe && <meshNormalMaterial color="#1E90FF" />}
-                
-            </mesh>
+                {(!props.isWireframe && !props.pressure) && <meshNormalMaterial color="#1E90FF" />}
+            </mesh>}
+            {props.pressure && <mesh geometry={geom}>
+                <meshStandardMaterial side={DoubleSide} color={0xf5f5f5} vertexColors/>
+            </mesh>}
             {props.limit && 
                 <mesh position={[
                     (Number(props.limit.xmin) + Number(props.limit.xmax)) / 2, 
@@ -157,8 +231,10 @@ const Model: FunctionComponent<IProps> = (props: IProps) => {
                     <meshStandardMaterial color={"green"} />
                 </mesh>
             ))}
-            <ambientLight />
-            <pointLight position={[20, 20, 20]} />
+            <ambientLight intensity={0.25} />
+            <pointLight position={[100, 0, 0]} />
+            <pointLight position={[0, 100, 100]} />
+            <pointLight position={[0, 0, 0]} />
             <OrbitControls />
         </>
     );

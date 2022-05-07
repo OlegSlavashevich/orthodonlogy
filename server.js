@@ -2,8 +2,9 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import fs from 'fs';
 import fileUpload from 'express-fileupload';
-import { spawn } from 'child_process';
+import { execSync, spawn } from 'child_process';
 import path from 'path';
+import { exec } from "child_process";
 
 const PORT = 8000;
 const app = express();
@@ -54,6 +55,39 @@ app.post('/api/generateMesh', (req, res) => {
         ]);
     }
     runScript();
+    fs.appendFileSync('ansys/result/Root.bat', '/batch\n', (err) => {
+        if (err) throw err;
+    });
+    fs.appendFileSync('ansys/result/Root.bat', '/filename, Root_Cycle_FZ\n', (err) => {
+        if (err) throw err;
+    });
+    fs.appendFileSync('ansys/result/Root.bat', '\n', (err) => {
+        if (err) throw err;
+    });
+    fs.appendFileSync('ansys/result/Root.bat', '!\n', (err) => {
+        if (err) throw err;
+    });
+    fs.appendFileSync('ansys/result/Root.bat', '*CREATE,res1\n', (err) => {
+        if (err) throw err;
+    });
+    fs.appendFileSync('ansys/result/Root.bat', '*cfopen,Results_StressesOnly,txt,,append\n', (err) => {
+        if (err) throw err;
+    });
+    fs.appendFileSync('ansys/result/Root.bat', '*vwrite,nx,ny,nz,ux,uy,uz\n', (err) => {
+        if (err) throw err;
+    });
+    fs.appendFileSync('ansys/result/Root.bat', "(F11.7,',',F11.7,',',F11.7,',',F13.11,',',F13.11,',',F13.11)\n", (err) => {
+        if (err) throw err;
+    });
+    fs.appendFileSync('ansys/result/Root.bat', '*cfclos\n', (err) => {
+        if (err) throw err;
+    });
+    fs.appendFileSync('ansys/result/Root.bat', '*END\n', (err) => {
+        if (err) throw err;
+    });
+    fs.appendFileSync('ansys/result/Root.bat', '\n', (err) => {
+        if (err) throw err;
+    });
     res.send(true);
 });
 
@@ -62,13 +96,17 @@ app.get('/api/getMesh', (req, res) => {
 });
 
 app.get('/api/getNodes', (req, res) => {
+    const apdlMesh = fs.readFileSync('./apdlmesh.txt','utf-8');
+    fs.appendFileSync('ansys/result/Root.bat', apdlMesh, (err) => {
+        if (err) throw err;
+    });
     res.sendFile(`${process.cwd()}/nodes.json`)
 })
 
 app.post('/api/addCommand', (req, res) => {
     const commands = req.body.commands;
     for (let i = 0; i < commands.length; i++) {
-        fs.appendFile('apdlmesh.txt', commands[i], (err) => {
+        fs.appendFile('ansys/result/Root.bat', commands[i], (err) => {
             if (err) throw err;
             console.log('Saved!');
         });
@@ -77,36 +115,203 @@ app.post('/api/addCommand', (req, res) => {
 });
 
 app.get('/api/getFile', (req, res) => {
-    fs.appendFileSync('apdlmesh.txt', 'FINISH\n', (err) => {
+    fs.appendFileSync('ansys/result/Root.bat', 'FINISH\n', (err) => {
         if (err) throw err;
         console.log('Saved!'); 
     });
-    fs.appendFileSync('apdlmesh.txt', '/SOL\n', (err) => {
+    fs.appendFileSync('ansys/result/Root.bat', '/SOL\n', (err) => {
         if (err) throw err;
     });
-    fs.appendFileSync('apdlmesh.txt', '/STATUS,SOLU\n', (err) => {
+    fs.appendFileSync('ansys/result/Root.bat', '/STATUS,SOLU\n', (err) => {
         if (err) throw err;
     });
-    fs.appendFileSync('apdlmesh.txt', 'SOLVE\n', (err) => {
+    fs.appendFileSync('ansys/result/Root.bat', 'SOLVE\n', (err) => {
         if (err) throw err;
     });
-    fs.appendFileSync('apdlmesh.txt', 'FINISH\n', (err) => {
+    fs.appendFileSync('ansys/result/Root.bat', 'FINISH\n', (err) => {
         if (err) throw err;
     });
-    fs.appendFileSync('apdlmesh.txt', '/POST1\n', (err) => {
+    fs.appendFileSync('ansys/result/Root.bat', '/POST1\n', (err) => {
         if (err) throw err;
     });
-    fs.appendFileSync('apdlmesh.txt', '!*\n', (err) => {
+    fs.appendFileSync('ansys/result/Root.bat', '!*\n', (err) => {
         if (err) throw err;
     });
-    fs.appendFileSync('apdlmesh.txt', '/EFACET,1\n', (err) => {
+    fs.appendFileSync('ansys/result/Root.bat', '/EFACET,1\n', (err) => {
         if (err) throw err;
     });
-    fs.appendFileSync('apdlmesh.txt', 'PLNSOL, S,EQV, 0,1.0\n', (err) => {
+    fs.appendFileSync('ansys/result/Root.bat', 'PLNSOL, S,EQV, 0,1.0\n', (err) => {
         if (err) throw err;
     });
-    res.sendFile(`${process.cwd()}/apdlmesh.txt`);
+
+    fs.appendFileSync('ansys/result/Root.bat', '\n', (err) => {
+        if (err) throw err;
+    });
+    fs.appendFileSync('ansys/result/Root.bat', 'allsel,all\n', (err) => {
+        if (err) throw err;
+    });
+    fs.appendFileSync('ansys/result/Root.bat', '*GET,nn,NODE,,COUNT, , , ,\n', (err) => {
+        if (err) throw err;
+    });
+    fs.appendFileSync('ansys/result/Root.bat', '\n', (err) => {
+        if (err) throw err;
+    });
+    fs.appendFileSync('ansys/result/Root.bat', '*do,i,1,nn,1\n', (err) => {
+        if (err) throw err;
+    });
+    fs.appendFileSync('ansys/result/Root.bat', '*GET,nr,NODE,,NUM,MIN, , , ,\n', (err) => {
+        if (err) throw err;
+    });
+    fs.appendFileSync('ansys/result/Root.bat', '*GET,nx,NODE,nr,LOC,x\n', (err) => {
+        if (err) throw err;
+    });
+
+    fs.appendFileSync('ansys/result/Root.bat', '*GET,ny,NODE,nr,LOC,y\n', (err) => {
+        if (err) throw err;
+    });
+    fs.appendFileSync('ansys/result/Root.bat', '*GET,nz,NODE,nr,LOC,z\n', (err) => {
+        if (err) throw err;
+    });
+    fs.appendFileSync('ansys/result/Root.bat', '*GET,ux,NODE,nr,U,x\n', (err) => {
+        if (err) throw err;
+    });
+    fs.appendFileSync('ansys/result/Root.bat', '*GET,uy,NODE,nr,U,y\n', (err) => {
+        if (err) throw err;
+    });
+    fs.appendFileSync('ansys/result/Root.bat', '*GET,uz,NODE,nr,U,z\n', (err) => {
+        if (err) throw err;
+    });
+
+    fs.appendFileSync('ansys/result/Root.bat', '!\n', (err) => {
+        if (err) throw err;
+    });
+    fs.appendFileSync('ansys/result/Root.bat', '*use,res1\n', (err) => {
+        if (err) throw err;
+    });
+    fs.appendFileSync('ansys/result/Root.bat', 'NSEL,U,,,nr\n', (err) => {
+        if (err) throw err;
+    });
+
+    fs.appendFileSync('ansys/result/Root.bat', '*enddo\n', (err) => {
+        if (err) throw err;
+    });
+    fs.appendFileSync('ansys/result/Root.bat', '\n', (err) => {
+        if (err) throw err;
+    });
+    fs.appendFileSync('ansys/result/Root.bat', 'allsel,all\n', (err) => {
+        if (err) throw err;
+    });
+    res.sendFile(`${process.cwd()}/ansys/result/Root.bat`);
 });
+
+app.get('/api/calculate', (req, res) => {
+    fs.appendFileSync('ansys/result/Root.bat', 'FINISH\n', (err) => {
+        if (err) throw err;
+        console.log('Saved!'); 
+    });
+    fs.appendFileSync('ansys/result/Root.bat', '/SOL\n', (err) => {
+        if (err) throw err;
+    });
+    fs.appendFileSync('ansys/result/Root.bat', '/STATUS,SOLU\n', (err) => {
+        if (err) throw err;
+    });
+    fs.appendFileSync('ansys/result/Root.bat', 'SOLVE\n', (err) => {
+        if (err) throw err;
+    });
+    fs.appendFileSync('ansys/result/Root.bat', 'FINISH\n', (err) => {
+        if (err) throw err;
+    });
+    fs.appendFileSync('ansys/result/Root.bat', '/POST1\n', (err) => {
+        if (err) throw err;
+    });
+    fs.appendFileSync('ansys/result/Root.bat', '!*\n', (err) => {
+        if (err) throw err;
+    });
+    fs.appendFileSync('ansys/result/Root.bat', '/EFACET,1\n', (err) => {
+        if (err) throw err;
+    });
+    fs.appendFileSync('ansys/result/Root.bat', 'PLNSOL, S,EQV, 0,1.0\n', (err) => {
+        if (err) throw err;
+    });
+
+    fs.appendFileSync('ansys/result/Root.bat', '\n', (err) => {
+        if (err) throw err;
+    });
+    fs.appendFileSync('ansys/result/Root.bat', 'allsel,all\n', (err) => {
+        if (err) throw err;
+    });
+    fs.appendFileSync('ansys/result/Root.bat', '*GET,nn,NODE,,COUNT, , , ,\n', (err) => {
+        if (err) throw err;
+    });
+    fs.appendFileSync('ansys/result/Root.bat', '\n', (err) => {
+        if (err) throw err;
+    });
+    fs.appendFileSync('ansys/result/Root.bat', '*do,i,1,nn,1\n', (err) => {
+        if (err) throw err;
+    });
+    fs.appendFileSync('ansys/result/Root.bat', '*GET,nr,NODE,,NUM,MIN, , , ,\n', (err) => {
+        if (err) throw err;
+    });
+    fs.appendFileSync('ansys/result/Root.bat', '*GET,nx,NODE,nr,LOC,x\n', (err) => {
+        if (err) throw err;
+    });
+
+    fs.appendFileSync('ansys/result/Root.bat', '*GET,ny,NODE,nr,LOC,y\n', (err) => {
+        if (err) throw err;
+    });
+    fs.appendFileSync('ansys/result/Root.bat', '*GET,nz,NODE,nr,LOC,z\n', (err) => {
+        if (err) throw err;
+    });
+    fs.appendFileSync('ansys/result/Root.bat', '*GET,ux,NODE,nr,U,x\n', (err) => {
+        if (err) throw err;
+    });
+    fs.appendFileSync('ansys/result/Root.bat', '*GET,uy,NODE,nr,U,y\n', (err) => {
+        if (err) throw err;
+    });
+    fs.appendFileSync('ansys/result/Root.bat', '*GET,uz,NODE,nr,U,z\n', (err) => {
+        if (err) throw err;
+    });
+
+    fs.appendFileSync('ansys/result/Root.bat', '!\n', (err) => {
+        if (err) throw err;
+    });
+    fs.appendFileSync('ansys/result/Root.bat', '*use,res1\n', (err) => {
+        if (err) throw err;
+    });
+    fs.appendFileSync('ansys/result/Root.bat', 'NSEL,U,,,nr\n', (err) => {
+        if (err) throw err;
+    });
+
+    fs.appendFileSync('ansys/result/Root.bat', '*enddo\n', (err) => {
+        if (err) throw err;
+    });
+    fs.appendFileSync('ansys/result/Root.bat', '\n', (err) => {
+        if (err) throw err;
+    });
+    fs.appendFileSync('ansys/result/Root.bat', 'allsel,all\n', (err) => {
+        if (err) throw err;
+    });
+    exec('cd ansys/result & "D:\\Ansys17\\ANSYS Inc\\v172\\ansys\\bin\\winx64\\ANSYS172.exe" -b -i "Root.bat" -o "test.out"', (error, stdout, stderr) => {
+        exec('cd ansys/pressureparser & python main.py', (error, stdout, stderr) => {
+            res.sendFile(`${process.cwd()}/ansys/pressureparser/result.json`);
+            setTimeout(() => {
+                fs.unlinkSync(`${process.cwd()}/ansys/pressureparser/result.json`);
+                fs.unlinkSync(`${process.cwd()}/ansys/result/Results_StressesOnly.txt`);
+                fs.unlinkSync(`${process.cwd()}/ansys/result/test.out`);
+            }, 7000);
+            if (error) {
+                console.log(`error: ${error.message}`);
+                return;
+            }
+            if (stderr) {
+                console.log(`stderr: ${stderr}`);
+                return;
+            }
+            console.log(`stdout: ${stdout}`);
+        });
+    });
+});
+
 
 app.listen(PORT, () => {
     console.log(`Server has been started on port ${PORT}...`);

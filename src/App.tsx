@@ -17,6 +17,8 @@ function App() {
     const [young, setYoung] = useState<string>('');
     const [poisson, setPoisson] = useState<string>('');
 
+    const [pressure, setPressure] = useState<number[][]>();
+
     const [isLoadingGeometry, setIsLoadingGeometry] = useState<boolean>(false);
     const [geometryLink, setGeometryLink] = useState<string>('http://localhost:8000/api/getGeometry');
     const [clickedPoint, setClickedPoint] = useState<Vector3>();
@@ -36,12 +38,10 @@ function App() {
     const [displaceNodes, setDisplaceNodes] = useState<number[][]>();
 
     function getFile(): void {
-        axios.get('http://localhost:8000/api/getFile', { responseType: 'blob' })
-            .then((res) => {
-                const textBlob = new Blob([res.data], { type: 'application/text' });
-                saveAs(textBlob, 'result.txt');
-            }
-        );
+        axios.get('http://localhost:8000/api/calculate').then((res: any) => {
+            setPressure(res.data);
+        });
+        // setPressure([[1,2,2]])
     }
 
     function uploadGeometry(event: any): void {
@@ -204,6 +204,7 @@ function App() {
                                 ? <Canvas camera={{ position: [0, 50, 50] }}>
                                     <Suspense fallback={null}>
                                         <Model
+                                            pressure={pressure}
                                             clickedCoord={clickedCoord}
                                             isAddToTable={isAddToTable}
                                             geometryLink={geometryLink}
